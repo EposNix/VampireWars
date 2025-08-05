@@ -344,7 +344,12 @@
             crossbow: { name: "Crossbow", color: '#ffcc00', effect: 'weapon', duration: 8000, description: "Powerful crossbow with high damage" },
             health: { name: "Health", color: '#00cc00', effect: 'health', duration: 0, description: "Restores one life point" },
             shield: { name: "Shield", color: '#3366ff', effect: 'shield', duration: 5000, description: "Temporary invincibility shield" },
-            bomb: { name: "Bomb", color: '#ff3366', effect: 'bomb', duration: 0, description: "Damages all enemies on screen" }
+            bomb: { name: "Bomb", color: '#ff3366', effect: 'bomb', duration: 0, description: "Damages all enemies on screen" },
+            flameRing: { name: "Flame Ring", color: '#ff6600', effect: 'defense', duration: 8000, description: "Burning ring that orbits the player" },
+            frostAura: { name: "Frost Aura", color: '#66ccff', effect: 'defense', duration: 8000, description: "Chilling aura that damages nearby foes" },
+            lightningOrb: { name: "Lightning Orb", color: '#ffff33', effect: 'defense', duration: 8000, description: "Electric orbs zap surrounding enemies" },
+            poisonCloud: { name: "Poison Cloud", color: '#66ff66', effect: 'defense', duration: 8000, description: "Toxic mist harms anything inside" },
+            shadowSpikes: { name: "Shadow Spikes", color: '#9900ff', effect: 'defense', duration: 8000, description: "Dark spikes spin around the player" }
         };
 
         // --- Utility Functions ---
@@ -1366,7 +1371,39 @@
                 ctx.beginPath(); ctx.arc(-this.radius * 0.3, -this.radius * 0.3, this.radius * 0.3, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.globalAlpha = 0.5; ctx.fill(); ctx.globalAlpha = 1.0;
                 // --- Claude's Symbol Drawing Logic ---
                 ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = 'bold 12px Arial';
-                switch (this.type) { case 'holyWater': ctx.beginPath(); ctx.moveTo(0, -5); ctx.quadraticCurveTo(5, 0, 0, 5); ctx.quadraticCurveTo(-5, 0, 0, -5); ctx.fill(); break; case 'crossbow': ctx.fillRect(-4, -1, 8, 2); ctx.fillRect(-1, -4, 2, 8); break; case 'health': ctx.fillRect(-4, -1, 8, 2); ctx.fillRect(-1, -4, 2, 8); break; case 'shield': ctx.beginPath(); ctx.moveTo(0, -5); ctx.lineTo(4, -2); ctx.lineTo(4, 3); ctx.lineTo(0, 5); ctx.lineTo(-4, 3); ctx.lineTo(-4, -2); ctx.closePath(); ctx.fill(); break; case 'bomb': ctx.beginPath(); ctx.arc(0, 1, 4, 0, Math.PI * 2); ctx.fill(); ctx.beginPath(); ctx.moveTo(0, -3); ctx.quadraticCurveTo(3, -5, 1, -7); ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke(); break; }
+                switch (this.type) {
+                    case 'holyWater':
+                        ctx.beginPath(); ctx.moveTo(0, -5); ctx.quadraticCurveTo(5, 0, 0, 5); ctx.quadraticCurveTo(-5, 0, 0, -5); ctx.fill();
+                        break;
+                    case 'crossbow':
+                        ctx.fillRect(-4, -1, 8, 2); ctx.fillRect(-1, -4, 2, 8);
+                        break;
+                    case 'health':
+                        ctx.fillRect(-4, -1, 8, 2); ctx.fillRect(-1, -4, 2, 8);
+                        break;
+                    case 'shield':
+                        ctx.beginPath(); ctx.moveTo(0, -5); ctx.lineTo(4, -2); ctx.lineTo(4, 3); ctx.lineTo(0, 5); ctx.lineTo(-4, 3); ctx.lineTo(-4, -2); ctx.closePath(); ctx.fill();
+                        break;
+                    case 'bomb':
+                        ctx.beginPath(); ctx.arc(0, 1, 4, 0, Math.PI * 2); ctx.fill();
+                        ctx.beginPath(); ctx.moveTo(0, -3); ctx.quadraticCurveTo(3, -5, 1, -7); ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke();
+                        break;
+                    case 'flameRing':
+                        ctx.beginPath(); ctx.arc(0, 0, 4, 0, Math.PI * 2); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+                        break;
+                    case 'frostAura':
+                        ctx.beginPath(); ctx.moveTo(0, -4); ctx.lineTo(0, 4); ctx.moveTo(-4, 0); ctx.lineTo(4, 0); ctx.moveTo(-3, -3); ctx.lineTo(3, 3); ctx.moveTo(3, -3); ctx.lineTo(-3, 3); ctx.strokeStyle = '#fff'; ctx.lineWidth = 1; ctx.stroke();
+                        break;
+                    case 'lightningOrb':
+                        ctx.beginPath(); ctx.moveTo(-2, -4); ctx.lineTo(0, -1); ctx.lineTo(-1, -1); ctx.lineTo(2, 4); ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke();
+                        break;
+                    case 'poisonCloud':
+                        ctx.beginPath(); ctx.arc(-2, -1, 2, 0, Math.PI * 2); ctx.arc(2, -1, 2, 0, Math.PI * 2); ctx.arc(0, 2, 2, 0, Math.PI * 2); ctx.fill();
+                        break;
+                    case 'shadowSpikes':
+                        ctx.beginPath(); ctx.moveTo(0, -5); ctx.lineTo(2, -2); ctx.lineTo(5, 0); ctx.lineTo(2, 2); ctx.lineTo(0, 5); ctx.lineTo(-2, 2); ctx.lineTo(-5, 0); ctx.lineTo(-2, -2); ctx.closePath(); ctx.fill();
+                        break;
+                }
                 // --- End Claude's Symbol Logic ---
                 ctx.restore();
             }
@@ -1377,6 +1414,7 @@
                  if (this.config.effect === 'weapon') { this.activeUntil = now + this.config.duration; player.setWeapon(this.type, this); game.notifications.show(`Collected ${this.config.name}!`, 2000); }
                  else if (this.config.effect === 'health') { game.gainLife(); game.notifications.show("Health restored!", 2000); return false; } // Remove immediately
                  else if (this.config.effect === 'shield') { player.activateShield(this.config.duration); this.activeUntil = now + this.config.duration; game.notifications.show("Shield activated!", 2000); }
+                 else if (this.config.effect === 'defense') { game.addDefensiveWeapon(this.type, this.config.duration); game.notifications.show(`${this.config.name} activated!`, 2000); return false; }
                  else if (this.config.effect === 'bomb') {
                      let enemiesHit = 0;
                      const damage = 5; // Bomb damage
@@ -1388,6 +1426,71 @@
                  }
                  game.uiManager.updateStats(game.score, game.lives, player.weaponType, game.level); // Update UI immediately for weapon change
                  return true; // Keep weapon/shield powerup for duration tracking
+            }
+        }
+
+        class DefensiveWeapon {
+            constructor(player, type, duration) {
+                this.player = player;
+                this.type = type;
+                this.timer = duration / 1000;
+                this.damage = 1;
+                this.damageInterval = 0.2;
+                this.damageTimer = 0;
+                switch (type) {
+                    case 'flameRing':
+                        this.color = '#ff6600'; this.radius = 40; this.orbRadius = 8; this.orbCount = 4; this.orbSpeed = 2;
+                        break;
+                    case 'frostAura':
+                        this.color = '#66ccff'; this.radius = 50; this.orbRadius = 7; this.orbCount = 6; this.orbSpeed = 1.5;
+                        break;
+                    case 'lightningOrb':
+                        this.color = '#ffff33'; this.radius = 45; this.orbRadius = 6; this.orbCount = 3; this.orbSpeed = 3;
+                        break;
+                    case 'poisonCloud':
+                        this.color = '#66ff66'; this.radius = 55; this.orbRadius = 6; this.orbCount = 8; this.orbSpeed = 1;
+                        break;
+                    case 'shadowSpikes':
+                        this.color = '#9900ff'; this.radius = 35; this.orbRadius = 8; this.orbCount = 5; this.orbSpeed = 2.5;
+                        break;
+                }
+                this.angles = [];
+                for (let i = 0; i < this.orbCount; i++) this.angles.push((i / this.orbCount) * Math.PI * 2);
+            }
+            update(deltaTime, game) {
+                this.timer -= deltaTime;
+                this.damageTimer -= deltaTime;
+                for (let i = 0; i < this.angles.length; i++) {
+                    this.angles[i] += this.orbSpeed * deltaTime;
+                }
+                if (this.damageTimer <= 0) {
+                    this.damageTimer = this.damageInterval;
+                    const enemies = game.enemies.concat(game.bosses);
+                    enemies.forEach(enemy => {
+                        if (enemy.markedForDeletion) return;
+                        for (const angle of this.angles) {
+                            const ox = this.player.x + Math.cos(angle) * this.radius;
+                            const oy = this.player.y + Math.sin(angle) * this.radius;
+                            if (distance(ox, oy, enemy.x, enemy.y) < this.orbRadius + enemy.radius) {
+                                const killed = enemy.takeDamage(this.damage, game);
+                                game.addParticles(enemy.x, enemy.y, this.color, 5, { speed: 50, life: 0.3 });
+                                if (killed) game.handleEnemyKilled(enemy);
+                                break;
+                            }
+                        }
+                    });
+                }
+                return this.timer > 0;
+            }
+            draw(ctx) {
+                ctx.fillStyle = this.color;
+                for (const angle of this.angles) {
+                    const x = this.player.x + Math.cos(angle) * this.radius;
+                    const y = this.player.y + Math.sin(angle) * this.radius;
+                    ctx.beginPath();
+                    ctx.arc(x, y, this.orbRadius, 0, Math.PI * 2);
+                    ctx.fill();
+                }
             }
         }
 
@@ -1449,7 +1552,7 @@
                 this.score = 0; this.lives = 3; this.level = 1; this.gameTime = 0;
                 this.player = new Player(this.width / 2, this.height / 2);
                 this.bullets = []; this.enemyProjectiles = []; this.enemies = [];
-                this.bosses = []; this.powerups = []; this.particles = [];
+                this.bosses = []; this.powerups = []; this.defensiveWeapons = []; this.particles = [];
                 this.enemySpawnTimer = 0; this.powerupSpawnTimer = 0;
                 this.lastTime = 0; this.gameActive = false; this.gamePaused = false;
                 this.animationFrameId = null; this.highScores = []; this.newHighScoreIndex = -1;
@@ -1588,6 +1691,7 @@
             addEnemy(enemy) { this.enemies.push(enemy); }
             addEnemyProjectile(projectile) { this.enemyProjectiles.push(projectile); }
             addDamageNumber(x, y, amount) { this.uiManager.showDamageNumber(x, y, amount); } // Delegate to UIManager
+            addDefensiveWeapon(type, duration) { this.defensiveWeapons.push(new DefensiveWeapon(this.player, type, duration)); }
 
             gainLife() {
                 this.lives = Math.min(this.lives + 1, CONFIG.MAX_LIVES);
@@ -1739,6 +1843,11 @@
                 if (this.level >= 2) availableTypes.push('shield');
                 if (this.level >= 3) availableTypes.push('crossbow');
                 if (this.level >= 4) availableTypes.push('bomb');
+                if (this.level >= 5) availableTypes.push('flameRing');
+                if (this.level >= 6) availableTypes.push('frostAura');
+                if (this.level >= 7) availableTypes.push('lightningOrb');
+                if (this.level >= 8) availableTypes.push('poisonCloud');
+                if (this.level >= 9) availableTypes.push('shadowSpikes');
                 this.powerups.push(new Powerup(x, y, getRandomElement(availableTypes)));
             }
 
@@ -1765,6 +1874,7 @@
                 this.enemies.forEach(e => e.update(deltaTime, this.player, this));
                 this.bosses.forEach(b => b.update(deltaTime, this.player, this));
                 this.powerups.forEach(p => p.update(deltaTime));
+                this.defensiveWeapons = this.defensiveWeapons.filter(d => d.update(deltaTime, this));
                 this.particles.forEach(p => p.update(deltaTime));
 
                 // Spawning (No regular enemies during boss fights)
@@ -1822,6 +1932,7 @@
                 this.enemyProjectiles.forEach(p => p.draw(this.ctx));
                 this.bullets.forEach(b => b.draw(this.ctx));
                 this.player.draw(this.ctx);
+                this.defensiveWeapons.forEach(d => d.draw(this.ctx));
 
                 // Screen Flash
                 if (this.screenFlashAlpha > 0) { this.ctx.fillStyle = this.screenFlashColor || '#fff'; this.ctx.globalAlpha = this.screenFlashAlpha; this.ctx.fillRect(0, 0, this.width, this.height); }
